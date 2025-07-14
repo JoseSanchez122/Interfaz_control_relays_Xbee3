@@ -1,6 +1,8 @@
 import customtkinter as ctk
 import threading
 from PIL import Image
+import serial
+import time
 
 RESIZE_SIZE = 1.0   #en caso que la interfaz se vea muy pequeña o grande con solo aumentar o disminuir
                     #este parametro (RESIZE_SIZE) se puede aumentar o disminuir el tamaño de toda la 
@@ -29,7 +31,6 @@ for i in range(4):
     main_frame.grid_columnconfigure(i, weight=1)
 
 #--------------------------------------Buttons-----------------------------------------#
-
 estilo_botones = {
     "font": ctk.CTkFont(size=16, weight="bold"),
     "fg_color": "#2C3E50",
@@ -42,23 +43,12 @@ estilo_botones = {
     "cursor": "hand2" 
 }
 
-def Show_NA_Relay(relay_id):
-    Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] = False
-    Relay_states["Relays NA"][f"Relay {relay_id}"]["Image"].grid_forget()
-    Relay_states["Relays NC"][f"Relay {relay_id}"]["Image"].grid(row=1, column=relay_id-1, padx=10, pady=10)
-
-def Show_NC_Relay(relay_id):
-    Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] = True
-    Relay_states["Relays NC"][f"Relay {relay_id}"]["Image"].grid_forget()
-    Relay_states["Relays NA"][f"Relay {relay_id}"]["Image"].grid(row=1, column=relay_id-1, padx=10, pady=10)
-
 def manejar_click(relay_id):
     if Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] == True:
-        Show_NA_Relay(relay_id)
+        Write_message("+O1")
     elif Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] == False:
-        Show_NC_Relay(relay_id)
+        Write_message("+o1")
     
-
 for i in range(4):
     texto = f"Switch\nRelay {i+1}"
     boton = ctk.CTkButton(main_frame, 
@@ -97,6 +87,23 @@ for i in range(4):
     Relay_states["Relays NC"][name] = {
         "Image": label_nc,
     }
+
+#--------------------------------------Funciones para imagenes-----------------------------------------#
+def Show_NA_Relay(relay_id):
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] = False
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["Image"].grid_forget()
+    Relay_states["Relays NC"][f"Relay {relay_id}"]["Image"].grid(row=1, column=relay_id-1, padx=10, pady=10)
+
+def Show_NC_Relay(relay_id):
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] = True
+    Relay_states["Relays NC"][f"Relay {relay_id}"]["Image"].grid_forget()
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["Image"].grid(row=1, column=relay_id-1, padx=10, pady=10)
+
+#--------------------------------------Funciones para mensajes por USB-----------------------------------------#
+def Write_message(message):
+    ser = serial.Serial('COM10', 19200, timeout=1)
+    ser.write((message + "\r\n").encode('utf-8'))
+    ser.close()
 
 
 app.mainloop()
