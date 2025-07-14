@@ -42,9 +42,21 @@ estilo_botones = {
     "cursor": "hand2" 
 }
 
+def Show_NA_Relay(relay_id):
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] = False
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["Image"].grid_forget()
+    Relay_states["Relays NC"][f"Relay {relay_id}"]["Image"].grid(row=1, column=relay_id-1, padx=10, pady=10)
+
+def Show_NC_Relay(relay_id):
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] = True
+    Relay_states["Relays NC"][f"Relay {relay_id}"]["Image"].grid_forget()
+    Relay_states["Relays NA"][f"Relay {relay_id}"]["Image"].grid(row=1, column=relay_id-1, padx=10, pady=10)
+
 def manejar_click(relay_id):
-    if relay_id == 1:
-        Relay_NC_Array[1].grid(row=1, column=0, padx=10, pady=10)
+    if Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] == True:
+        Show_NA_Relay(relay_id)
+    elif Relay_states["Relays NA"][f"Relay {relay_id}"]["State"] == False:
+        Show_NC_Relay(relay_id)
     
 
 for i in range(4):
@@ -63,15 +75,28 @@ Relay_Nc = Image.open("NC.png")
 Relay_Na_image = ctk.CTkImage(light_image=Relay_Na.resize((170, 170)), size=(170, 170))
 Relay_Nc_image = ctk.CTkImage(light_image=Relay_Nc.resize((170, 170)), size=(170, 170))
 
-Relay_NA_Array = {}
-Relay_NC_Array = {}
+Relay_states = {
+    "Relays NA": {},
+    "Relays NC": {}
+}
 
 for i in range(4):
-    label = ctk.CTkLabel(main_frame, image=Relay_Na_image, text="")
-    label.grid(row=1, column=i, padx=10, pady=10)
-    Relay_NA_Array.append(label)
-    label2 = ctk.CTkLabel(main_frame, image=Relay_Nc_image, text="")
-    Relay_NC_Array.append(label2)
+    name = f"Relay {i+1}"
+
+    label_na = ctk.CTkLabel(main_frame, image=Relay_Na_image, text="")
+    label_na.grid(row=1, column=i, padx=10, pady=10)
+
+    label_nc = ctk.CTkLabel(main_frame, image=Relay_Nc_image, text="")
+
+    # Agregar al subdiccionario existente
+    Relay_states["Relays NA"][name] = {
+        "Image": label_na,
+        "State": True
+    }
+
+    Relay_states["Relays NC"][name] = {
+        "Image": label_nc,
+    }
 
 
 app.mainloop()
